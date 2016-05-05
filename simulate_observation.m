@@ -1,4 +1,4 @@
-%% script to assess the performances of an astrophotography setup to observe LEO satellites
+%% script to simulate an observation of a LEO satellite
 
 %% algorithm short description:
 %   -compute the system psf, taking into account diffraction, seeing, and
