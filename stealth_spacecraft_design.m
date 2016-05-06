@@ -1,9 +1,10 @@
 %% script to asses the design of a stealth spacecraft with low thermal signature
 
 %% detailed algorithm description
-%   -compute energy absorbed sy spacecraft due to sunlight (spacecraft
+%   -compute energy absorbed by spacecraft due to sunlight (spacecraft
 %   assumed to be fully passive, no heat generation)
-%   -compute quantity of coolant needed to absorb this energy
+%   -compute quantity of coolant needed to absorb this energy (spacecraft
+%   dumps energy by heating and venting coolant)
 %   -compute volume of coolant needed to absorb this energy
 
 %% spacecraft bus specs
@@ -59,5 +60,6 @@ height_coolant=coolant_vol/front_area;% height of a cylinder with diameter of th
 %all coolant
 surf_area=pi*diameter*height_coolant;
 % surface area of satellite(approximated by coolant cylinder) in m^2
+
 radiated_pow=surf_area*sigma*t_max^4;% radiated power in W
 received_bckgrd_pow=surf_area*sigma*bckgrd_temp^4;% power received from cosmic background in W

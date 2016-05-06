@@ -6,22 +6,22 @@
 %   -2) compute sum of read noise, uncorrected fixed pattern noise and dark noise from dark frame
 %   -3) compute signal and remaining noise from a long exposure sky
 %   photograph, in several different ROIs
-%   -4) assess if sensor is quantum-limited 
+%   -4) assess if sensor is quantum-limited and compute sensor gain
 
 clear, clc
 
 % 1) load images
-bayer(:,:,1)=logical(imread('D:\Clement\Documents\Espace\perso\photos\nikon_1j2_bayer_R.tif'));
+bayer(:,:,1)=logical(imread('nikon_1j2_bayer_R.tif'));
 % bayer mask for red channel
-bayer(:,:,2)=logical(imread('D:\Clement\Documents\Espace\perso\photos\nikon_1j2_bayer_G.tif'));
+bayer(:,:,2)=logical(imread('nikon_1j2_bayer_G.tif'));
 % bayer mask for green channel
-bayer(:,:,3)=logical(imread('D:\Clement\Documents\Espace\perso\photos\nikon_1j2_bayer_B.tif'));
+bayer(:,:,3)=logical(imread('nikon_1j2_bayer_B.tif'));
 % bayer mask for blue channel
-dark=double(imread('D:\Clement\Documents\Espace\perso\photos\2016 4 30 malakoff\DSC_2505.tiff'));
+dark=double(imread('2016 4 30 malakoff\DSC_2505.tiff'));
 % dark frame, debayered with bilinear interpolation (dcraw -r 1 1 1 1 -q 0 -o 0 -v -4 -T 
-debayerFrame=double(imread('D:\Clement\Documents\Espace\perso\photos\2016 4 30 malakoff\DSC_2504_debayer.tiff'));
+debayerFrame=double(imread('2016 4 30 malakoff\DSC_2504_debayer.tiff'));
 % sensor raw frame, debayered with bilinear interpolation 
-balancedFrame=double(imread('D:\Clement\Documents\Espace\perso\photos\2016 4 30 malakoff\DSC_2504_balanced.tiff'));
+balancedFrame=double(imread('2016 4 30 malakoff\DSC_2504_balanced.tiff'));
 % processed version of debayerFrame, adjusted for display
 
 % correct for scaling of dcraw
@@ -81,7 +81,7 @@ end
 
 
 %% 4) Assess if sensor is quantum limited
-remainingNoise=noise-repmat(darkNoise,nROI,1)
+remainingNoise=sqrt(noise.^2-repmat(darkNoise.^2,nROI,1))
 remainingNoiseVar=remainingNoise.^2;
 
 figure(7)
@@ -103,7 +103,7 @@ xlim([0 1000])
 xlabel('mean signal')
 ylabel('noise variance')
 title('variance vs signal plot')
-%if points are aligned in this plot, sensor is quantum-limited
+%if sensor is quantum-limited, points are on a line going through (0,0) 
 
 snr=meanSignal./remainingNoise;
 snr2=snr.^2 % if sensor is quantum-limited, this is the number of photons per pixel
