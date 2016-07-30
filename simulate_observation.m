@@ -23,7 +23,7 @@ albedo=1;% object albedo
 height=108;% height of object in m
 width=70;% width of object in m
 sigma=height*width% object cross section in m2
-d=540e3;% object distance in m
+d=400e3;% object distance in m
 speed=8e3;% orthoradial object speed in m/s
 zenitAngle=0;% zenit angle in radian
 passDuration=180;% duration of the pass, in s
@@ -31,19 +31,22 @@ passDuration=180;% duration of the pass, in s
 % instrument 
 % (values are for an Orion XT8 OTA with 3x Barlow and ZWO asi174mm camera)
 % optical assembly
-focal=3.6;% focal length of telescope in m (XT8:1.2)
+focal=3.6;% focal length of telescope in m (Orion XT8:1.2)
 aperture=0.2;% diameter of aperture in m
 strehl=0.8;% strehl ratio
 curvature=3.6;% telescope field curvature in m
 % sensor
 useSpectrum=0.4;% portion of the spectrum used (in fraction of total power)
-pixSpace=5.86e-6;% pixel pitch in m 6.8e-6=nikon 1 j2 2x binned (video mode)
+pixSpace=5.86e-6;% pixel pitch in m
+%5.86e-6=ZWO ASI 174MM
 DQE=0.5;% DQE of detector without bayer
 transBayer=1;% DQE of Bayer filter
 expTime=1/4000;% exposure time in ms
-imFreq=164;% frequency at which images are taken in Hz
-widthSensor=1936;% width of sensor in number of pixels 1920=nikon 1j2 HD video
+imFreq=90;% frequency at which images are taken in Hz
+%1936*1216=ZWO ASI 174MM on USB3, real-world speed
+widthSensor=1936;% width of sensor in number of pixels 
 heightSensor=1216; % height of sensor in number of pixels 
+%1936*1216=ZWO ASI 174MM
 noiseStd=0;% std deviation of sensor noise (dark current+read noise)
 sensorGain=1;% ADC gain factor, from electrons to digital gray level
 rolling=false;% set to true if sensor has a rolling shutter
@@ -131,7 +134,7 @@ if(tracked)
 else
     % no tracking, objects drifts in FoV
     timeFoV=FoV/speed;% time object remains in sensor FoV, in s
-    nImages=timeFoV*imFreq;
+    nFrames=timeFoV*imFreq;
 end
 
 %% simulated images
@@ -149,7 +152,7 @@ imtool(lumi);
 
 
 blur=fspecial('gaussian',[ceil(resolDiff/im_rez*10),ceil(resolDiff/im_rez*10)],...
-    sqrt(resolDiff^2+0*resolAtm^2)/im_rez);
+    sqrt(resolDiff^2+0*resolAtm^2)/im_rez/2.35);
 %compute size of diffraction+seeing psf in high-rez image pixels
 blurred=conv2(lumi,blur);% apply psf to high-rez image
 
@@ -160,7 +163,7 @@ blurred=conv2(blurred,motionblur);% apply motion blur
 imtool(blurred);
 
 
-sampling=ceil(resolPix/im_rez);% compute system samplign in high-rez image pixels
+sampling=ceil(resolPix/im_rez);% compute system sampling interval, in high-rez image pixels
 downsampled=conv2(blurred,ones(sampling,sampling)/sampling^2);
 downsampled=downsampled(1:sampling:end,1:sampling:end);% downsample high-rez image
 
