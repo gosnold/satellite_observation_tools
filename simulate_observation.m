@@ -17,6 +17,7 @@ atmAbs=1050/1360;% 1-way atmospheric transmittance
 lambda=5e-7;% mean wavelength of interest in m
 h=6.6E-34;% planck constant in SI units
 c=3E8;% speed of light, in m/s
+S0V = 4e-2;% spectral flux density of a 0-magnitude star per surface area , in W/m2(of surface)/m2 (of bandwidth)
 
 % object (values are for ISS)
 albedo=1;% object albedo
@@ -36,6 +37,7 @@ aperture=0.2;% diameter of aperture in m
 strehl=0.8;% strehl ratio
 curvature=3.6;% telescope field curvature in m
 % sensor
+bandwidth = 0.3e-6;% optical bandwidth in m
 useSpectrum=0.4;% portion of the spectrum used (in fraction of total power)
 pixSpace=5.86e-6;% pixel pitch in m
 %5.86e-6=ZWO ASI 174MM
@@ -69,6 +71,7 @@ trackingError=0.0065;% mean apparent movement of the target between 2 successive
 r0=0.15;% atmosphere length of coherence at 0 zenit angle at observation, in m
 H=7e3;% mean effective turbulence height in m
 windSpeed=20;% wind speed in turbulent layer m/s
+airglowMag = 14;% sky background magnitude per arcsec
 
 %% Computations
 
@@ -95,7 +98,6 @@ resolTracking=trackingError*expTime*d;% size of  blurring due to movement of obj
 resolCurvature=aperture*((pixSpace*widthSensor/focal)^2)/8*d;
 % size of  blurring dur to field curvature, at the edgde of sensor, in m
 
-
 %compute rolling shutter distortion (worst case, shutter takes 1 frame to
 %complete)
 if (rolling)
@@ -115,12 +117,19 @@ angleResolPix=pixSpace/focal;% angular resolution of 1 pixel
 nPixisoplan=theta0/angleResolPix;% isoplanatic angle in pixels
 
 
-% compute amount of quantum noise in image
+% compute amount of quantum noise in image, in the object
 TQE=DQE*transBayer;% total quantum efficiency of instrument
 nPixObj=ceil(height*width/(resolPix^2));
 % number of pixels filled by the object, without any blurring effects
 nPhotonObj=nPhotonExp*TQE;% number of converted photons coming from object
 nPhotonPix=nPhotonObj/nPixObj;% number of converted photon from object per pixel
+
+% compute signal and quantum noise due to airglow effects 
+pixAngle = pixSpace/focal; %IFOV of a pixel in radian
+pixSterAngle=(1-cos(pixAngle/2))*8;  %IFOV of a pixel in steradian
+pixSterAngleArcsec= pixSterAngle * (4.25e10); %IFOV of a pixel in arcsec
+nPhotonAirglow =10^(-airglowMag/2.5)*S0V*collectA*TQE*bandwidth*expTime*pixSterAngleArcsec/photonE; %number of photons due to airglow per pixel
+
 
 % compute number of images with target in frame
 FoV=widthSensor*resolPix;% size of FoV at object in m
@@ -176,7 +185,7 @@ if(rolling)
     nPhotonPix=nPhotonPix/shutterDistortion; % correct for distorted object size
 end
 %add quantum and sensor noise
-frame=downsampled*nPhotonPix;
+frame=downsampled*nPhotonPix + nPhotonAirglow;
 frame=uint16(frame);
 frame=imnoise(frame,'poisson');
 frame=double(frame);
