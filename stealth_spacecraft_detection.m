@@ -55,7 +55,6 @@ f = (fmax + fmin)/2; % bandpass center frequency
 lambda = c/f; % corresponding wavelength
 lambdaMin = c/fmax; % lower bandpass wavelength
 lambdaMax = c/fmin; % upper bandpass wavelength
-NyquistFreq = 2*B; % Nyquist sampling frequency for the sensor
 
 % compute noise power
 galacticBkg = galacticBkgMJy*Jy2SI; % brightness of sky at 100 microns in W/m2/sr/Hz
