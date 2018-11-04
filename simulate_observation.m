@@ -161,7 +161,7 @@ imtool(lumi);
 
 
 blur=fspecial('gaussian',[ceil(resolDiff/im_rez*10),ceil(resolDiff/im_rez*10)],...
-    sqrt(resolDiff^2+0*resolAtm^2)/im_rez/2.35);
+    sqrt(resolDiff^2+resolAtm^2)/im_rez/2.35);
 %compute size of diffraction+seeing psf in high-rez image pixels
 blurred=conv2(lumi,blur);% apply psf to high-rez image
 
